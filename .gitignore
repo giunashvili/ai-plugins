@@ -1,0 +1,7 @@
+.DS_Store
+.env
+.env.*
+profiles.json
+profiles.local.json
+*.key
+*.pem

@@ -1,0 +1,7 @@
+{
+  "name": "ai-plugins",
+  "interface": {
+    "displayName": "AI Plugins"
+  },
+  "plugins": []
+}
