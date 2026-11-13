@@ -1,0 +1,61 @@
+{
+  "manifest_version": "0.3",
+  "name": "select-connection",
+  "display_name": "Select \u2014 Single Connection",
+  "description": "One read-only MySQL connection for Claude Desktop chat.",
+  "author": {
+    "name": "Select contributors"
+  },
+  "user_config": {
+    "project": {
+      "type": "string",
+      "title": "Project",
+      "required": true
+    },
+    "environment": {
+      "type": "string",
+      "title": "Environment",
+      "required": true
+    },
+    "host": {
+      "type": "string",
+      "title": "Host",
+      "required": true
+    },
+    "database": {
+      "type": "string",
+      "title": "Database",
+      "required": true
+    },
+    "user": {
+      "type": "string",
+      "title": "User",
+      "required": true
+    },
+    "password": {
+      "type": "string",
+      "title": "Password",
+      "required": true,
+      "sensitive": true
+    },
+    "port": {
+      "type": "number",
+      "title": "Port",
+      "required": true,
+      "default": 3306,
+      "min": 1,
+      "max": 65535
+    },
+    "tls": {
+      "type": "boolean",
+      "title": "Verify TLS",
+      "default": true
+    },
+    "ca_file": {
+      "type": "file",
+      "title": "CA certificate (optional)",
+      "default": ""
+    }
+  },
+  "icon": "assets/icon.png"
+}

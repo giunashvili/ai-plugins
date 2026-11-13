@@ -1,6 +1,6 @@
 # AI Plugins
 
-Private marketplace catalog for shared AI plugins. No plugins are published yet.
+Private repository for shared AI plugin source and marketplace catalogs.
 
 ## Structure
 
@@ -8,20 +8,41 @@ Private marketplace catalog for shared AI plugins. No plugins are published yet.
 ai-plugins/
 ├── .agents/plugins/marketplace.json  # ChatGPT / Codex catalog
 ├── .claude-plugin/marketplace.json  # Claude catalog
-├── plugins/                        # Ready-to-install plugin folders
-│   └── .gitkeep
+├── plugins/
+│   └── select/                     # Select source, skills and build tooling
+│       ├── .claude-plugin/
+│       ├── .codex-plugin/
+│       ├── src/                    # Go backend and HTML/CSS/JavaScript UI
+│       ├── scripts/                # Build and packaging commands
+│       ├── skills/
+│       ├── docs/
+│       ├── go.mod
+│       ├── plugin.json
+│       └── README.md
 ├── .gitignore
 └── README.md
 ```
 
-## Adding a plugin
+## Select development
 
-1. Build and test the plugin in its source repository.
-2. Place its distribution files in `plugins/<plugin-name>/`, including the required manifests, skills and compiled executable when applicable.
-3. Add an entry to each marketplace catalog using that host's format. Paths are relative to this repository's root.
-4. Give the plugin its own version and verify its supported operating systems and processors.
-5. Merge the reviewed publishing pull request into `main`, then verify marketplace synchronization.
+Run commands from `plugins/select/`:
 
-Keep development builds in the source repository. Publish tested updates here; use Git tags to record released catalog revisions.
+```sh
+cd plugins/select
+go run ./scripts check
+go run ./scripts dev
+```
 
-Never include local connection settings, passwords, private keys or machine-specific development wrappers.
+Builds and the machine-specific development wrapper go into `plugins/select/build/`. Release packaging is explicit; see [Select maintenance](plugins/select/docs/maintenance.md).
+
+Each plugin owns its source, manifests, skills, dependencies and build tooling. Generated builds and release archives are Git-ignored.
+
+## Publishing
+
+The marketplace catalogs are currently empty. Select source has moved here, but it has not been published to either marketplace.
+
+Before registering a plugin, build and test its supported platforms and provide the compiled executable required by its MCP manifests. Merely committing Go source does not make Select installable. Do not publish machine-specific development wrappers.
+
+Add each ready-to-install plugin to both catalogs using the host-specific format. Paths are relative to this repository's root. Merge reviewed updates into `main` with the plugin's version bump; Git tags can record released catalog revisions.
+
+Never include local connection settings, passwords or private keys.

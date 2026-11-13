@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.env.*
+*.log
+*.pem
+*.key
+*.p12
+*.pfx
+profiles.json
+profiles.local.json
+connections.json
+build/
+releases/

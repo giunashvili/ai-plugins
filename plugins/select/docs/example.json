@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "projects": {
+    "example-project": {
+      "environments": {
+        "example-environment": {
+          "host": "",
+          "port": 3306,
+          "database": "",
+          "user": "",
+          "tls": {
+            "enabled": true
+          }
+        }
+      }
+    }
+  }
+}

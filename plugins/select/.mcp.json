@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "select": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/server/select",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}
