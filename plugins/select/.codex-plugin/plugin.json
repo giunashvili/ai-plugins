@@ -8,7 +8,7 @@
   "skills": "./skills/",
   "mcpServers": "./mcp.json",
   "requires_local_executor": true,
-  "onboardingSkill": "./skills/db-setup/SKILL.md",
+  "onboardingSkill": "./skills/setup/SKILL.md",
   "interface": {
     "displayName": "Select",
     "shortDescription": "Projects and database access",

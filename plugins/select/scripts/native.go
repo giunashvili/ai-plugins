@@ -168,7 +168,7 @@ func check(root string) error {
 			return fmt.Errorf("obsolete Node runtime path remains: %s", name)
 		}
 	}
-	for _, name := range []string{"assets/icon.png", "src/main.go", "src/ui/index.html", "src/ui/app.js", "skills/db-setup/SKILL.md", "skills/database-query/SKILL.md", "go.mod", "go.sum"} {
+	for _, name := range []string{"assets/icon.png", "src/main.go", "src/ui/index.html", "src/ui/app.js", "skills/setup/SKILL.md", "skills/query/SKILL.md", "go.mod", "go.sum"} {
 		if _, e := os.Stat(filepath.Join(root, name)); e != nil {
 			return e
 		}
