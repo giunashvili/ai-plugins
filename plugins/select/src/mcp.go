@@ -46,7 +46,7 @@ func runMCP(ctx context.Context, desktop bool) error {
 			return textResult(r), nil, nil
 		})
 	} else {
-		mcp.AddTool(server, &mcp.Tool{Name: "db_status", Title: "List database projects", Description: "List configured projects and environments, without credentials. This does not verify connectivity.", Annotations: hint(true, false)}, func(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
+		mcp.AddTool(server, &mcp.Tool{Name: "db_status", Title: "List database projects", Description: "List projects and environments with configured status, color and emoji, without credentials. Configured means saved connection details and password, not verified connectivity.", Annotations: hint(true, false)}, func(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
 			r, err := statusData()
 			if err != nil {
 				return toolError("Could not read database settings."), nil, nil

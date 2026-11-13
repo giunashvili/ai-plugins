@@ -62,6 +62,40 @@ for (const color of projectColors) {
   button.addEventListener('click', () => changeProjectColor(color));
   document.querySelector('#project-colors').append(button);
 }
+const environmentEmojis = { neutral: '⚪', blue: '🔵', orange: '🟠', red: '🔴', green: '🟢', yellow: '🟡', purple: '🟣' };
+function defaultEnvironmentColor(name) {
+  switch (name.trim().toLowerCase()) {
+    case 'development': case 'dev': return 'blue';
+    case 'staging': case 'stage': return 'orange';
+    case 'production': case 'prod': return 'red';
+    default: return 'neutral';
+  }
+}
+for (const [color, emoji] of Object.entries(environmentEmojis)) {
+  const button = document.createElement('button');
+  const name = color[0].toUpperCase() + color.slice(1);
+  button.type = 'button'; button.className = 'color-swatch'; button.dataset.color = color;
+  button.setAttribute('aria-label', `${name} environment color`); button.title = `${emoji} ${name}`;
+  button.setAttribute('aria-pressed', 'false');
+  button.addEventListener('click', () => changeEnvironmentColor(color));
+  document.querySelector('#environment-colors').append(button);
+}
+function updateEnvironmentAppearance() {
+  const color = projects[selectedProject]?.environments[selectedEnvironment]?.color || 'neutral';
+  for (const button of document.querySelectorAll('#environment-colors .color-swatch')) button.setAttribute('aria-pressed', String(button.dataset.color === color));
+}
+async function changeEnvironmentColor(color) {
+  const project = selectedProject, name = selectedEnvironment;
+  if (uiBusy || !project || !name || projects[project].environments[name].color === color) return;
+  closeMenus(); setBusy(true);
+  try {
+    await api.SetEnvironmentColor(project, name, color);
+    projects[project].environments[name].color = color;
+    renderEnvironments(name); updateEnvironmentAppearance();
+    setFeedback('Environment color updated.', 'success');
+  } catch (error) { setFeedback(String(error?.message || error), 'error'); }
+  finally { setBusy(false); }
+}
 function closeMenus() {
   projectMenu.hidden = true; environmentMenu.hidden = true;
   projectOptions.setAttribute('aria-expanded', 'false'); environmentOptions.setAttribute('aria-expanded', 'false');
@@ -85,11 +119,11 @@ document.addEventListener('keydown', event => {
 function updateProjectAppearance() {
   const color = projects[selectedProject]?.color || '';
   projectSummary.dataset.color = color;
-  for (const button of document.querySelectorAll('.color-swatch')) button.setAttribute('aria-pressed', String(button.dataset.color === color));
+  for (const button of document.querySelectorAll('#project-colors .color-swatch')) button.setAttribute('aria-pressed', String(button.dataset.color === color));
 }
 function updateManagementControls() {
   const projectMethods = ['RenameProject', 'DeleteProject', 'SetProjectColor'].every(name => typeof api[name] === 'function');
-  const environmentMethods = ['RenameEnvironment', 'DeleteEnvironment'].every(name => typeof api[name] === 'function');
+  const environmentMethods = ['RenameEnvironment', 'DeleteEnvironment', 'SetEnvironmentColor'].every(name => typeof api[name] === 'function');
   projectOptions.disabled = uiBusy || !ready || !selectedProject || !projectMethods;
   environmentOptions.disabled = uiBusy || !ready || !selectedEnvironment || !environmentMethods;
   projectOptions.title = projectMethods ? 'Project options' : 'Close and reopen settings to enable project options.';
@@ -147,7 +181,7 @@ manageForm.addEventListener('submit', async event => {
   try {
     if (action.type === 'create-project') {
       await api.CreateProject(newName);
-      projects[newName] = { color: '', environments: Object.create(null) };
+      await loadProjects();
       selectProject(newName); created = true;
     } else if (action.type === 'rename-project') {
       await api.RenameProject(action.project, newName);
@@ -173,7 +207,7 @@ manageForm.addEventListener('submit', async event => {
     const message = created ? 'Project created.' : action.type.startsWith('delete') ? 'Deleted from Select.' : 'Renamed.';
     if (selectedProject) setFeedback(message, 'success'); else projectStatus.textContent = message;
   } catch (error) { manageError.textContent = String(error?.message || error) || 'Could not update settings.'; }
-  finally { setBusy(false); if (created) fields.environment.focus(); }
+  finally { setBusy(false); if (created) fields.host.focus(); }
 });
 function formSnapshot() {
   return JSON.stringify(['environment', 'host', 'port', 'database', 'user', 'password'].map(name => fields[name].value).concat(fields.tls.checked));
@@ -264,10 +298,18 @@ function selectProject(project) {
 }
 function renderEnvironments(selected) {
   const project = selectedProject;
-  const names = Object.keys(projects[project].environments).sort();
+  const order = name => {
+    switch (name.trim().toLowerCase()) {
+      case 'development': case 'dev': return 0;
+      case 'staging': case 'stage': return 1;
+      case 'production': case 'prod': return 2;
+      default: return 3;
+    }
+  };
+  const names = Object.keys(projects[project].environments).sort((a, b) => order(a) - order(b) || a.localeCompare(b));
   environmentSelect.replaceChildren();
   for (const name of names) {
-    const option = document.createElement('option'); option.value = name; option.textContent = name; environmentSelect.append(option);
+    const option = document.createElement('option'); option.value = name; option.textContent = `${environmentEmojis[projects[project].environments[name].color] || '⚪'} ${name}`; environmentSelect.append(option);
   }
   const add = document.createElement('option'); add.value = ''; add.textContent = '+ Add environment'; environmentSelect.append(add);
   environmentSelect.value = selected;
@@ -276,7 +318,8 @@ function renderEnvironments(selected) {
 function selectEnvironment(environment) {
   closeMenus();
   selectedEnvironment = environment; environmentSelect.value = environment; form.reset(); setFeedback('');
-  const connection = environment ? projects[selectedProject].environments[environment] : undefined;
+  const connection = environment ? projects[selectedProject].environments[environment].connection : undefined;
+  updateEnvironmentAppearance();
   fields.environment.value = environment; fields.environment.readOnly = Boolean(environment);
   document.querySelector('#connection-title').textContent = environment ? `${environment} connection` : 'New environment';
   for (const field of ['host', 'port', 'database', 'user']) fields[field].value = connection?.[field] ?? (field === 'port' ? 3306 : '');
@@ -294,10 +337,10 @@ function connectionInput() {
   if (!project || !validName(environment)) { setFeedback('Select a project and enter a valid environment name.', 'error'); return null; }
   if (!selectedEnvironment && has(projects[project].environments, environment)) { setFeedback('This environment already exists. Select it above to edit it.', 'error'); return null; }
   const connection = { host: fields.host.value.trim(), port: Number(fields.port.value), database: fields.database.value.trim(), user: fields.user.value.trim(), tls: { enabled: fields.tls.checked } };
-  const savedCA = selectedEnvironment ? projects[project].environments[selectedEnvironment].tls?.caFile : undefined;
+  const savedCA = selectedEnvironment ? projects[project].environments[selectedEnvironment].connection?.tls?.caFile : undefined;
   if (connection.tls.enabled && savedCA) connection.tls.caFile = savedCA;
   const body = { project, environment, connection };
-  if (!selectedEnvironment || fields.password.value !== '') body.password = fields.password.value;
+  if (!projects[project].environments[selectedEnvironment]?.connection || fields.password.value !== '') body.password = fields.password.value;
   return body;
 }
 testButton.addEventListener('click', async () => {
@@ -321,18 +364,21 @@ form.addEventListener('submit', async event => {
   setBusy(true, 'save'); setFeedback('');
   try {
     await api.SaveEnvironment(body);
-    projects[project].environments[environment] = connection;
+    projects[project].environments[environment] = { color: projects[project].environments[environment]?.color || defaultEnvironmentColor(environment), connection };
     selectProject(project); selectEnvironment(environment);
     saveState.textContent = 'Saved';
     savedTimer = window.setTimeout(() => { if (!hasChanges()) saveState.textContent = ''; }, 3000);
   } catch (error) { setFeedback(String(error?.message || error) || 'Could not save. Check configuration file permissions and try again.', 'error'); }
   finally { setBusy(false); }
 });
-setBusy(true);
-api.ListProjects().then(result => {
+async function loadProjects() {
+  const result = await api.ListProjects();
   projects = Object.create(null);
   for (const [name, project] of Object.entries(result)) {
     projects[name] = { color: project.color || '', environments: Object.assign(Object.create(null), project.environments) };
   }
+}
+setBusy(true);
+loadProjects().then(() => {
   ready = true; selectProject(Object.keys(projects).sort()[0] || ''); setBusy(false);
 }).catch(() => { projectStatus.textContent = 'Could not load settings. Close and reopen Select setup.'; });

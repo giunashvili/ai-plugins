@@ -102,3 +102,22 @@ func (a *App) DeleteEnvironment(projectName, name string) error {
 		return nil
 	})
 }
+
+func (a *App) SetEnvironmentColor(projectName, name, color string) error {
+	if !validEnvironmentColor(color) {
+		return errors.New("choose one of the environment colors")
+	}
+	return changeConfiguration(func(config *Config) error {
+		project, ok := config.Projects[projectName]
+		if !ok {
+			return errors.New("project is not configured")
+		}
+		env, ok := project.Environments[name]
+		if !ok {
+			return errors.New("environment does not exist")
+		}
+		env.Color = color
+		project.Environments[name] = env
+		return nil
+	})
+}

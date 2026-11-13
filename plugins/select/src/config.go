@@ -63,17 +63,27 @@ func (c *Connection) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+type Environment struct {
+	Color      string      `json:"color,omitempty"`
+	Connection *Connection `json:"connection,omitempty"`
+}
+
 type Project struct {
-	Environments map[string]Connection `json:"environments"`
-	Color        string                `json:"color,omitempty"`
+	Environments map[string]Environment `json:"environments"`
+	Color        string                 `json:"color,omitempty"`
 }
 type Config struct {
 	Version  int                `json:"version"`
 	Projects map[string]Project `json:"projects"`
 }
+type legacyProject struct {
+	Environments map[string]Connection `json:"environments"`
+	Color        string                `json:"color,omitempty"`
+}
+
 type diskConfig struct {
 	Version    int                   `json:"version"`
-	Projects   map[string]Project    `json:"projects,omitempty"`
+	Projects   json.RawMessage       `json:"projects,omitempty"`
 	Profiles   map[string]Connection `json:"profiles,omitempty"`
 	RuntimeDir string                `json:"runtimeDir,omitempty"`
 }
@@ -169,7 +179,7 @@ func validateConnection(c Connection) (Connection, error) {
 	return c, nil
 }
 func loadConfig() (Config, error) {
-	empty := Config{Version: 3, Projects: map[string]Project{}}
+	empty := Config{Version: 4, Projects: map[string]Project{}}
 	p := filepath.Join(configDirectory(false), "profiles.json")
 	b, err := os.ReadFile(p)
 	if errors.Is(err, os.ErrNotExist) && os.Getenv("DB_PLUGIN_CONFIG_DIR") == "" && os.Getenv("FALCON_DB_CONFIG_DIR") == "" {
@@ -188,14 +198,31 @@ func loadConfig() (Config, error) {
 	if err = decodeJSON(b, &raw); err != nil {
 		return empty, errors.New("invalid database configuration JSON")
 	}
+	var projects map[string]Project
 	switch raw.Version {
-	case 1:
-		if raw.Projects != nil || raw.Profiles == nil {
-			return empty, errors.New("invalid legacy configuration")
+	case 1, 2, 3:
+		var legacy map[string]legacyProject
+		if raw.Version == 1 {
+			if raw.Projects != nil || raw.Profiles == nil {
+				return empty, errors.New("invalid legacy configuration")
+			}
+			legacy = map[string]legacyProject{"falcon": {Environments: raw.Profiles}}
+		} else if raw.Profiles != nil || decodeJSON(raw.Projects, &legacy) != nil || legacy == nil {
+			return empty, errors.New("invalid project configuration")
 		}
-		raw.Projects = map[string]Project{"falcon": {Environments: raw.Profiles}}
-	case 2, 3:
-		if raw.Projects == nil || raw.Profiles != nil {
+		projects = map[string]Project{}
+		for name, old := range legacy {
+			if old.Environments == nil {
+				return empty, errors.New("invalid project environments")
+			}
+			p := Project{Color: old.Color, Environments: map[string]Environment{}}
+			for env, connection := range old.Environments {
+				p.Environments[env] = Environment{Color: defaultEnvironmentColor(env), Connection: &connection}
+			}
+			projects[name] = p
+		}
+	case 4:
+		if raw.Profiles != nil || decodeJSON(raw.Projects, &projects) != nil || projects == nil {
 			return empty, errors.New("invalid project configuration")
 		}
 	default:
@@ -204,28 +231,37 @@ func loadConfig() (Config, error) {
 	if raw.RuntimeDir != "" && !filepath.IsAbs(raw.RuntimeDir) {
 		return empty, errors.New("invalid legacy runtime directory")
 	}
-	for name, p := range raw.Projects {
+	for name, p := range projects {
 		if !validName(name) || p.Environments == nil {
 			return empty, errors.New("invalid project name or environments")
 		}
 		if !validProjectColor(p.Color) {
 			return empty, errors.New("invalid project color")
 		}
-		for env, c := range p.Environments {
-			if !validName(env) {
+		for name, env := range p.Environments {
+			if !validName(name) {
 				return empty, errors.New("invalid environment name")
 			}
-			c, err = validateConnection(c)
-			if err != nil {
-				return empty, err
+			if env.Color == "" {
+				env.Color = defaultEnvironmentColor(name)
 			}
-			p.Environments[env] = c
+			if !validEnvironmentColor(env.Color) {
+				return empty, errors.New("invalid environment color")
+			}
+			if env.Connection != nil {
+				connection, err := validateConnection(*env.Connection)
+				if err != nil {
+					return empty, err
+				}
+				env.Connection = &connection
+			}
+			p.Environments[name] = env
 		}
 	}
-	return Config{Version: 3, Projects: raw.Projects}, nil
+	return Config{Version: 4, Projects: projects}, nil
 }
 func saveConfig(c Config) error {
-	c.Version = 3
+	c.Version = 4
 	dir := configDirectory(false)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return errors.New("could not create the configuration folder")
@@ -274,10 +310,10 @@ func getConnection(project, environment string) (Connection, error) {
 		return Connection{}, errors.New("project is not configured")
 	}
 	v, ok := p.Environments[environment]
-	if !ok {
+	if !ok || v.Connection == nil {
 		return Connection{}, errors.New("environment is not configured")
 	}
-	return v, nil
+	return *v.Connection, nil
 }
 func statusData() (map[string]any, error) {
 	c, err := loadConfig()
@@ -287,8 +323,8 @@ func statusData() (map[string]any, error) {
 	p := map[string]any{}
 	for name, v := range c.Projects {
 		e := map[string]any{}
-		for env := range v.Environments {
-			e[env] = map[string]bool{"configured": true}
+		for name, env := range v.Environments {
+			e[name] = map[string]any{"configured": env.Connection != nil && env.Connection.Password != nil, "color": env.Color, "emoji": environmentEmoji(env.Color)}
 		}
 		p[name] = map[string]any{"environments": e}
 	}

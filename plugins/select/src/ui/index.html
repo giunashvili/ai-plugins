@@ -38,7 +38,7 @@
         <div id="empty" class="empty-state">
           <div class="empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><path d="M12 11v6m-3-3h6"/></svg></div>
           <h2>A place for every project</h2>
-          <p>Create your first project in the sidebar, then add environments like development or staging.</p>
+          <p>Create a project to start with Development, Staging and Production.</p>
           <span class="empty-note">Each environment keeps its own connection and credentials.</span>
         </div>
         <div id="editor" hidden>
@@ -60,6 +60,7 @@
                 <button id="environment-options" class="icon-button options-toggle" type="button" aria-label="Environment options" title="Environment options" aria-expanded="false" aria-controls="environment-menu" disabled><span aria-hidden="true">⋯</span></button>
                 <div id="environment-menu" class="options-menu" role="group" aria-label="Environment options" hidden>
                   <button id="rename-environment" type="button">Rename environment</button>
+                  <div class="color-choices" role="group" aria-label="Environment color"><span class="menu-label">Environment color</span><div id="environment-colors" class="color-swatches"></div></div>
                   <button id="delete-environment" class="danger" type="button">Delete environment…</button>
                 </div>
               </div>

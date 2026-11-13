@@ -93,6 +93,8 @@ nav:empty::after { content: "Your projects will appear here."; font-size: 12px; 
 [data-color="pink"] { --project-color: #c87ca8; }
 [data-color="teal"] { --project-color: #429eaa; }
 [data-color="amber"] { --project-color: #b68b22; }
+[data-color="yellow"] { --project-color: #c3a629; }
+[data-color="neutral"] { --project-color: #939393; }
 .project .project-icon { color: var(--project-color, var(--muted)); }
 .project-icon svg { width: 19px; height: 19px; }
 .project-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; }

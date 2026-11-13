@@ -23,9 +23,13 @@ func (a *App) ListProjects() (map[string]Project, error) {
 	c, err := loadConfig()
 	// The UI only needs connection metadata; keep saved passwords write-only.
 	for _, project := range c.Projects {
-		for name, connection := range project.Environments {
-			connection.Password = nil
-			project.Environments[name] = connection
+		for name, env := range project.Environments {
+			if env.Connection != nil {
+				connection := *env.Connection
+				connection.Password = nil
+				env.Connection = &connection
+			}
+			project.Environments[name] = env
 		}
 	}
 	return c.Projects, err
@@ -43,7 +47,7 @@ func (a *App) CreateProject(name string) error {
 	if _, ok := c.Projects[name]; ok {
 		return errors.New("this project already exists")
 	}
-	c.Projects[name] = Project{Environments: map[string]Connection{}}
+	c.Projects[name] = Project{Environments: defaultEnvironments()}
 	return saveConfig(c)
 }
 func (a *App) SaveEnvironment(input EnvironmentInput) error {
@@ -58,7 +62,12 @@ func (a *App) SaveEnvironment(input EnvironmentInput) error {
 		return err
 	}
 	p := c.Projects[input.Project]
-	p.Environments[input.Environment] = v
+	env := p.Environments[input.Environment]
+	if env.Color == "" {
+		env.Color = defaultEnvironmentColor(input.Environment)
+	}
+	env.Connection = &v
+	p.Environments[input.Environment] = env
 	c.Projects[input.Project] = p
 	return saveConfig(c)
 }
@@ -96,8 +105,8 @@ func environmentConnection(c Config, input EnvironmentInput) (Connection, error)
 		return Connection{}, errors.New("create the project first")
 	}
 	v.Password = input.Password
-	if v.Password == nil {
-		v.Password = p.Environments[input.Environment].Password
+	if saved := p.Environments[input.Environment].Connection; v.Password == nil && saved != nil {
+		v.Password = saved.Password
 	}
 	_, err = storedPassword(v)
 	if err != nil {
