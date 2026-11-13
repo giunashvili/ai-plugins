@@ -1,0 +1,11 @@
+{
+  "name": "select",
+  "version": "0.5.0",
+  "description": "Local MySQL access organized by project and environment.",
+  "author": {
+    "name": "Select contributors"
+  },
+  "displayName": "Select",
+  "mcpServers": "./.mcp.json",
+  "icon": "./assets/icon.png"
+}

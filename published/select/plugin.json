@@ -1,0 +1,34 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "select",
+  "version": "0.5.0",
+  "description": "Local MySQL access organized by project and environment.",
+  "author": {
+    "name": "Select contributors"
+  },
+  "keywords": [
+    "mysql",
+    "database",
+    "projects",
+    "environments"
+  ],
+  "extensions": {
+    "com.openai": {
+      "requires_local_executor": true,
+      "onboardingSkill": "./skills/setup/SKILL.md",
+      "interface": {
+        "displayName": "Select",
+        "shortDescription": "Projects and database access",
+        "longDescription": "Native MySQL MCP with projects and environments, configured in an embedded desktop settings window.",
+        "developerName": "Select contributors",
+        "category": "Developer Tools",
+        "capabilities": [
+          "Read"
+        ],
+        "defaultPrompt": "Show my configured database projects and environments.",
+        "composerIcon": "./assets/icon.png",
+        "logo": "./assets/icon.png"
+      }
+    }
+  }
+}

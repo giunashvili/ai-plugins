@@ -47,7 +47,7 @@ Before subsequent releases, increment the same internal version in the three Sel
 
 The script never runs Git commands, creates commits or pushes/uploads anything. Review the generated changes, then commit and push only when explicitly requested. There are no GitHub Actions requirements.
 
-Both catalogs stay empty until the first successful local release. Creating this script has not published a release.
+A successful local release updates both catalogs to the prepared package. Colleagues receive those files after an explicitly requested commit and push.
 
 ## Installation
 

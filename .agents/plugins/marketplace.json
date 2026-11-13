@@ -1,7 +1,15 @@
 {
-  "name": "ai-plugins",
   "interface": {
     "displayName": "AI Plugins"
   },
-  "plugins": []
+  "name": "ai-plugins",
+  "plugins": [
+    {
+      "name": "select",
+      "source": {
+        "path": "./published/select",
+        "source": "local"
+      }
+    }
+  ]
 }

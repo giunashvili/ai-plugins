@@ -6,7 +6,7 @@ A native Go MySQL MCP executable with a Wails desktop settings window. Organize 
 
 ## Use
 
-Install the plugin package matching your OS and processor from your team's source. In a Codex or Claude session that runs MCP locally on your desktop, ask **“Open Select setup.”** The plugin opens a desktop window. Create a project, add an environment, and enter connection details. **Test connection** checks the current form without saving it and shows success or a specific error. Save the environment when ready; Save is enabled only for changed values and briefly confirms success. Return to your agent to query that project/environment.
+Install Select from your marketplace or the shared release ZIP; its launcher selects the matching OS and processor. In a Codex or Claude session that runs MCP locally on your desktop, ask **“Open Select setup.”** The plugin opens a desktop window. Create a project, add an environment, and enter connection details. **Test connection** checks the current form without saving it and shows success or a specific error. Save the environment when ready; Save is enabled only for changed values and briefly confirms success. Return to your agent to query that project/environment.
 
 Use the project and environment **⋯** menus to rename or delete saved entries. The project menu also offers preset colors. Renaming preserves saved connections and passwords; deleting removes settings from Select after confirmation and does not modify a database.
 
@@ -24,7 +24,7 @@ Queries accept one read-only SELECT/SHOW/DESCRIBE/EXPLAIN statement. Multiple st
 
 ## Platforms
 
-Targets: macOS, Windows, Linux, each on x64 (`amd64`) and ARM64. Each future plugin ZIP contains exactly one executable for its target, manifests, skills, and notices. Choose the platform on which the local agent actually runs; a WSL session uses the Linux build.
+The shared release package includes macOS, Windows and Linux executables for x64 (`amd64`) and ARM64, plus manifests, skills, icon and notices. The launcher selects the platform on which the local MCP agent runs; a WSL session uses Linux. Windows ARM64 uses a small x64 launcher under Windows 11 emulation, then starts the native ARM64 executable. The lower-level packager can still create single-platform ZIPs and the separate single-connection MCPB.
 
 - macOS uses the system WebKit engine.
 - Windows uses WebView2. The WebView2 runtime must be installed.

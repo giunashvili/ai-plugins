@@ -3,5 +3,11 @@
   "owner": {
     "name": "giunashvili"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "select",
+      "source": "./published/select",
+      "version": "0.5.0"
+    }
+  ]
 }
