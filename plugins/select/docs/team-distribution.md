@@ -1,23 +1,21 @@
-# Private distribution
+# Distribution
 
-No releases are generated until explicitly requested. WIP packages are specific to one OS and processor and omit versions: `select-OS-ARCH.zip`, `select-marketplace-OS-ARCH.zip`, and `select-connection-OS-ARCH.mcpb`. Go uses `amd64` for x64 and `arm64` for ARM64.
+The public catalog lives at `giunashvili/ai-plugins`. It lists Select only after a successful explicit local release creates `published/select/` and the resulting changes are committed and pushed. See the repository [README](../../../README.md) for the release command. No GitHub Actions or automatic commits are required.
 
-## Claude
+## Install from the public repository
 
-For a personal installation, use Customize → Plugins → Add → Upload plugin, select the ZIP matching the local execution machine, and enable Select. Start a new Claude session that executes MCP on your local desktop, then ask to open Select setup. The desktop settings window collects connection credentials.
+Each colleague adds `giunashvili/ai-plugins` as a marketplace source, then installs Select. In Claude, open **Plugins → Add → Add marketplace → Add from a repository**. This account-level installation is separate from centrally managed organization GitHub syncing; Claude currently requires a private/internal repository for that organization-sync flow.
 
-For a team, an owner can upload the matching plugin ZIP through Organization settings → Plugins & skills, or host the supplied marketplace in a private repository. Keep platform variants in separate marketplaces with clear platform labels; uploading another platform under the same name in the same marketplace would replace its executable. Users install the variant matching their machine. Plugin identity remains select.
+ChatGPT/Codex uses `.agents/plugins/marketplace.json`; Claude uses `.claude-plugin/marketplace.json`. Both point at the same self-contained `published/select/` package. Its launcher selects macOS or Linux x64/ARM64; Windows resolves the shared command to the included `.exe` bootstrap, which starts the native x64/ARM64 executable. Windows ARM64 requires Windows 11 x64 emulation for the bootstrap. Only install one Select instance in a client to avoid duplicate tools.
 
-## Codex
+The runtime must execute locally with a graphical desktop to open settings. Linux users can use a local MCP-capable client with a desktop session; publishing a Linux executable does not imply a Linux edition of Claude Cowork exists. Cloud and ordinary browser chat cannot open the native settings window.
 
-Use the matching platform's private marketplace source. The root portable manifest launches the included native executable over stdio. Each platform variant contains the same tools and skills, without a Node requirement. Keep platform-specific marketplaces clearly labeled. For WSL, choose the Linux variant corresponding to the WSL execution environment.
+## Dependencies and updates
 
-The current checked-in manifests describe the Unix executable path. The explicit packager generates Windows manifests ending in `.exe`. Ordinary Claude Desktop chat uses the separate MCPB single-connection extension, not the project manager.
+Users need database network/VPN access and platform WebView libraries: WebView2 on Windows, GTK3 and WebKitGTK 4.1 on Linux. They do not install Go, Node, Docker or an OS credential-store service. Verify actual client installation, setup startup and a read-only query on each platform before claiming it tested. Signing and notarization are separate from building the binaries.
 
-## Prerequisites and updates
+Update via the client's marketplace controls and start a fresh session when required. Project/environment settings and plaintext passwords remain in each user's local configuration directory, outside the package. Never distribute another person's settings, credentials, private keys or private database hosts.
 
-The MCP process must run in the same desktop session as the settings window. Sandboxed/cloud executors without a desktop cannot open it. Teammates need the platform's native webview libraries and database network access. They do not install Go, Node or an OS credential-store service. Update through the same platform's marketplace and start a new session. Project/environment settings and plaintext passwords stay in the user's configuration folder, outside the package. After updating from an OS-store build, save each missing password once in setup.
+The lower-level per-target packager still generates `select-OS-ARCH.zip`, a per-target marketplace ZIP and the separate `select-connection-OS-ARCH.mcpb`. These filenames omit versions while WIP. The MCPB is for ordinary Claude Desktop single-connection chat and does not expose the project manager.
 
-Do not distribute another person's settings, credential files, private keys or database hosts. No automatic publishing or account installation is performed by developer build commands. Signing/notarization and actual client/OS installation must be verified before a team release.
-
-References: [Claude plugins](https://claude.com/docs/plugins/overview), [organization distribution](https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization), [native Wails prerequisites](https://v2.wails.io/docs/gettingstarted/installation/).
+References: [Claude installation](https://support.claude.com/en/articles/13837440-use-plugins-in-claude), [organization distribution](https://support.claude.com/en/articles/13837433-manage-plugins-for-your-organization), [OpenAI marketplace import](https://learn.chatgpt.com/docs/enterprise/plugin-management), [Wails prerequisites](https://v2.wails.io/docs/gettingstarted/installation/).

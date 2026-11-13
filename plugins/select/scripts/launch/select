@@ -1,0 +1,15 @@
+#!/bin/sh
+set -eu
+
+case "$(uname -s)" in
+  Darwin) system=darwin ;;
+  Linux) system=linux ;;
+  *) echo 'Select: this launcher supports macOS and Linux. Windows uses select.exe.' >&2; exit 1 ;;
+esac
+case "$(uname -m)" in
+  arm64|aarch64) arch=arm64 ;;
+  x86_64|amd64) arch=amd64 ;;
+  *) echo 'Select: unsupported processor; x64 or ARM64 is required.' >&2; exit 1 ;;
+esac
+directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec "$directory/$system-$arch/select" "$@"

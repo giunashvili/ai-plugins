@@ -66,7 +66,24 @@ Validation runs the development manifests from a copied temporary installation d
 
 References: [Claude local plugin components](https://claude.com/docs/plugins/build#check-what-each-app-loads), [OpenAI local plugin development](https://developers.openai.com/plugins/build/plugins#install-a-local-plugin-manually).
 
-## Explicit release commands
+## Local multi-platform release
+
+Use the repository-level release script from `ai-plugins/`, only when a release is requested:
+
+```sh
+go run ./scripts/release.go select -check
+go run ./scripts/release.go select
+```
+
+This builds all six native GUI targets, assembles the shared installable package in `published/select/`, updates both catalogs and creates the unversioned ZIP plus checksum in the repository's `releases/`. The full build runs on a Mac with Xcode tools and Docker Desktop; Linux targets use disposable Debian containers with GTK3 and WebKitGTK 4.1 development packages. Users do not need Docker or a Go/Node runtime. Windows ARM64 uses an x64 bootstrap under Windows 11 emulation, then the native ARM64 executable.
+
+The script never commits, pushes or uploads. Published files become available to marketplace users only after an explicitly requested commit and push. For a subsequent release, increment the matching version in all three plugin manifests and `src/mcp.go`; filenames remain unversioned. Explicit `-binaries /directory` accepts prebuilt production GUI executables after target validation, and requires the publisher to verify source freshness.
+
+The package contains a POSIX `server/select` launcher and a Windows `server/select.exe` bootstrap. Windows executable resolution adds `.exe` to the shared extensionless MCP command. Both preserve stdin/stdout/stderr and arguments. The runtime executable remains responsible for MCP and settings behavior. Verify actual client launch on Windows and Linux before marking those hosts tested.
+
+The existing per-target commands below remain available for isolated packages and the separate Claude Desktop single-connection MCPB.
+
+## Explicit per-target package commands
 
 Only run these when a release is requested:
 

@@ -1,0 +1,5 @@
+plugins/select/scripts/launch/select text eol=lf
+published/select/server/select text eol=lf
+published/select/server/*/select binary
+*.exe binary
+*.png binary

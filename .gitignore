@@ -5,3 +5,5 @@ profiles.json
 profiles.local.json
 *.key
 *.pem
+/releases/
+/published/.release-select-*/
