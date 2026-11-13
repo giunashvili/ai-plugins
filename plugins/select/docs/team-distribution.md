@@ -14,7 +14,7 @@ The runtime must execute locally with a graphical desktop to open settings. Linu
 
 Users need database network/VPN access and platform WebView libraries: WebView2 on Windows, GTK3 and WebKitGTK 4.1 on Linux. They do not install Go, Node, Docker or an OS credential-store service. Verify actual client installation, setup startup and a read-only query on each platform before claiming it tested. Signing and notarization are separate from building the binaries.
 
-Update via the client's marketplace controls and start a fresh session when required. Project/environment settings and plaintext passwords remain in each user's local configuration directory, outside the package. Never distribute another person's settings, credentials, private keys or private database hosts.
+Marketplace installations should track `main`, where each release updates the prepared package and version metadata. In Claude, enable **Sync automatically** for the GitHub marketplace or select **Check for updates**. In ChatGPT/Codex, refresh the configured Git marketplace and start a fresh local session when required. ZIP-uploaded development or release copies are independent snapshots: update their ZIP explicitly to receive new skills and manifests. Project/environment settings and plaintext passwords remain in each user's local configuration directory, outside the package. Never distribute another person's settings, credentials, private keys or private database hosts.
 
 The lower-level per-target packager still generates `select-OS-ARCH.zip`, a per-target marketplace ZIP and the separate `select-connection-OS-ARCH.mcpb`. These filenames omit versions while WIP. The MCPB is for ordinary Claude Desktop single-connection chat and does not expose the project manager.
 

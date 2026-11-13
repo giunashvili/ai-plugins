@@ -23,6 +23,8 @@ No persistent test suite is kept. Use disposable external fixtures and developme
 
 ## Verification performed
 
+Disposable fixtures verified v1/v2/v3-to-v4 migration, unchanged legacy files on read, credentials/TLS/project-color preservation, environment color overrides, default creation and deletion, neutral overrides, redaction, strict invalid-input rejection and private file permissions. Native macOS ARM64 checks verified Development/Staging/Production ordering, the preset chooser, immediate color persistence and preservation of unsaved host edits through color changes and environment renames. Query headers are skill instructions; host adherence still needs verification after a package update.
+
 Disposable management fixtures verified credential/TLS/color preservation during renames, duplicate and invalid-input rejection without file changes, project/environment deletion scope, color persistence/redaction, prototype-like names and last-entry deletion. UI flow checks verified preset choices, draft preservation during renames/color changes, duplicate errors, delete cancellation and selection/empty-state recovery after deletion.
 
 Disposable MySQL protocol fixtures verified setup connection testing with both saved and newly entered passwords, current unsaved database values, sanitized authentication failures, and byte-for-byte unchanged configuration after both successful and failed tests. Frontend checks covered unchanged/reverted Save state, password edits, testing progress/success/failure, Saved confirmation, duplicate-save prevention and preservation of edits after a save failure.
